@@ -1,3 +1,6 @@
-libspatialindex-dev
 gdal-bin
+gdal-data
 libgdal-dev
+proj-bin
+proj-data
+libproj-dev
