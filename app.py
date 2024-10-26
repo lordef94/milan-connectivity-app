@@ -48,7 +48,7 @@ max_time = st.sidebar.slider(
 st.write('Caricamento dei dati...')
 
 # Carica i confini dei quartieri
-quartieri = gpd.read_file('quartieri_milano.geojson')
+quartieri = gpd.read_file('quartieri_milano.geojson', engine='pyogrio')
 quartieri = quartieri.to_crs(epsg=4326)
 
 # Scarica la rete stradale
