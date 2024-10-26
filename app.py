@@ -49,6 +49,11 @@ st.write('Caricamento dei dati...')
 
 # Carica i confini dei quartieri
 quartieri = gpd.read_file('quartieri_milano.geojson', engine='pyogrio')
+
+# Imposta la colonna geometrica attiva
+quartieri = quartieri.set_geometry('geometry')
+
+# Trasforma il CRS
 quartieri = quartieri.to_crs(epsg=4326)
 
 # Scarica la rete stradale
@@ -134,4 +139,3 @@ quartieri = quartieri.sort_values(by='connettività', ascending=False)
 
 # Mostriamo i primi 10 quartieri
 st.write(quartieri[['NIL', 'connettività']].head(10))
-
