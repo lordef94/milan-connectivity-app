@@ -48,7 +48,7 @@ max_time = st.sidebar.slider(
 st.write('Caricamento dei dati...')
 
 # Carica i confini dei quartieri
-quartieri = gpd.read_file('quartieri_milano.geojson', engine='pyogrio')
+quartieri = gpd.read_file('quartieri_milano.geojson')
 
 # Imposta la colonna geometrica attiva
 quartieri = quartieri.set_geometry('geometry')
@@ -57,20 +57,21 @@ quartieri = quartieri.set_geometry('geometry')
 quartieri = quartieri.to_crs(epsg=4326)
 
 # Scarica la rete stradale
-G = ox.graph_from_place('Milano, Italia', network_type=network_type)
+place = 'Milano, Italia'
+G = ox.graph_from_place(place, network_type=network_type)
 
 # Definisci i tag per i servizi selezionati
 tags = {'amenity': selected_services}
 
 # Scarica i punti di interesse
-poi = ox.geometries_from_place('Milano, Italia', tags)
+poi = ox.geometries_from_place(place, tags)
 
 # Calcolo della connettività
 st.write('Calcolo della connettività...')
 
 # Funzione per calcolare l'isocrona
 def calculate_isochrone(G, center_point, max_dist):
-    center_node = ox.distance.nearest_nodes(G, center_point.x, center_point.y)
+    center_node = ox.nearest_nodes(G, center_point.x, center_point.y)
     subgraph = nx.ego_graph(G, center_node, radius=max_dist, distance='length')
     nodes, edges = ox.graph_to_gdfs(subgraph)
     return nodes.unary_union.convex_hull
@@ -119,14 +120,24 @@ folium.Choropleth(
 # Aggiungiamo i servizi (opzionale)
 if st.sidebar.checkbox('Mostra i servizi sulla mappa'):
     for idx, row in poi.iterrows():
-        if isinstance(row.geometry, Point):
+        geom = row.geometry
+        if geom.geom_type == 'Point':
             folium.CircleMarker(
-                location=[row.geometry.y, row.geometry.x],
+                location=[geom.y, geom.x],
                 radius=2,
                 color='blue',
                 fill=True,
                 fill_color='blue'
             ).add_to(m)
+        elif geom.geom_type == 'MultiPoint':
+            for point in geom.geoms:
+                folium.CircleMarker(
+                    location=[point.y, point.x],
+                    radius=2,
+                    color='blue',
+                    fill=True,
+                    fill_color='blue'
+                ).add_to(m)
 
 # Visualizziamo la mappa
 st_data = st_folium(m, width=700)
