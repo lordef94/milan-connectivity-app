@@ -9,3 +9,4 @@ matplotlib
 pyproj
 rtree
 contextily
+streamlit_folium
